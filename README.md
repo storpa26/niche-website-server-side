@@ -9,7 +9,7 @@
 	(c) CSS3
 	(d) Firebase Authentication
 
-### `5Back-end Technology:`
+### `Back-end Technology:`
 
 	(a) Node
 	(b) Express
