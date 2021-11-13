@@ -102,10 +102,17 @@ async function run() {
             res.json({ admin: isAdmin })
         })
 
+        //post review
         app.post('/reviews', async (req, res) => {
             const review = req.body;
             const result = await reviewCollection.insertOne(review);
             res.json(result);
+        })
+        //get review
+        app.get('/reviews', async (req, res) => {
+            const cursor = reviewCollection.find({});
+            const reviews = await cursor.toArray();
+            res.send(reviews);
         })
 
     }
