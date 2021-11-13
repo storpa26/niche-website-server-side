@@ -31,6 +31,13 @@ async function run() {
             res.send(cars);
         })
 
+        //post car
+        app.post('/cars', async (req, res) => {
+            const car = req.body;
+            const result = await carCollection.insertOne(car);
+            res.json(result);
+        })
+
         //get specefic car
         app.get('/cars/:id', async (req, res) => {
             const id = req.params.id;
