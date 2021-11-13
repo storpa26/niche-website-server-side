@@ -4,21 +4,74 @@ const port = process.env.PORT || 5000
 const cors = require('cors');
 require('dotenv').config()
 const { MongoClient } = require('mongodb');
-
+const ObjectId = require('mongodb').ObjectId;
 app.use(cors());
-
+app.use(express.json());
 app.get('/', (req, res) => {
     res.send('Hello World!')
 })
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.jlnj9.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-console.log(uri);
+
 
 
 async function run() {
     try {
         await client.connect();
-        console.log('database connected');
+        const database = client.db('CarPortal');
+        const carCollection = database.collection('cars');
+        const orderCollection = database.collection('orders');
+
+        //get cars from database
+        app.get('/cars', async (req, res) => {
+            const cursor = carCollection.find({});
+            const cars = await cursor.toArray();
+            res.send(cars);
+        })
+
+        //get specefic car
+        app.get('/cars/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const car = await carCollection.findOne(query);
+            res.json(car);
+        })
+        //post user orders
+        app.post('/orders', async (req, res) => {
+            const order = req.body;
+            const result = await orderCollection.insertOne(order);
+            res.json(result);
+        })
+        app.get('/orders', async (req, res) => {
+            const cursor = orderCollection.find({});
+            const orders = await cursor.toArray();
+            res.send(orders);
+        })
+        //get specefic user order based on email
+        app.get('/filteredorders', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email }
+            const cursor = orderCollection.find(query);
+            const userOrder = await cursor.toArray();
+            res.json(userOrder);
+        })
+
+        //get specefic orders by id
+        app.get('/orders/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: ObjectId(id) };
+            const result = await orderCollection.findOne(query);;
+            res.send(result);
+        })
+
+        //Delete user order
+        app.delete('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await orderCollection.deleteOne(query);
+            res.send(result)
+        })
+
     }
     finally {
         // await client.close();
